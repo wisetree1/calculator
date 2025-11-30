@@ -11,27 +11,17 @@ const currOperandNode = screen.querySelector(".current-operand");
 const keyboard = document.body.querySelector(".keyboard");
 
 for (let numberBtn of keyboard.querySelectorAll(".number")) {
-    numberBtn.onclick = () => insertNumber(currOperandNode, +numberBtn.textContent);
+    numberBtn.onclick = () => currOperandNode.textContent = insertNumberIntoNode(currOperandNode, +numberBtn.textContent);
 }
 
-
-let cePressedCount = 0;
 const keyCE = keyboard.querySelector(".key-CE");
-keyCE.onclick = () => cePressedCount = clearScreen(currOperandNode, prevOperandNode, operatorNode, cePressedCount+1);
-
-keyboard.addEventListener("click", (e) => {
-    if (e.target.className === "key-CE") {
-        cePressedCount++;
-    } else if (e.target.nodeName === "BUTTON") {
-        cePressedCount = 0;
-    }
-});
+keyCE.onclick = () => [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent] = clearScreen(currOperandNode, prevOperandNode, operatorNode);
 
 const keySqrt = keyboard.querySelector(".key-sqrt");
 keySqrt.onclick = () => sqrtContent(currOperandNode);
 
 const keyPercent = keyboard.querySelector(".key-percent");
-keyPercent.onclick = () => divideContent(currOperandNode, 100);
+keyPercent.onclick = () => currOperandNode.textContent = divideNodeValue(currOperandNode, 100);
 
 const keyRecip = keyboard.querySelector(".key-recip");
 keyRecip.onclick = () => recipContent(currOperandNode);
@@ -51,87 +41,91 @@ keyAdd.onclick = () => enterOperation(currOperandNode, prevOperandNode, operator
 const keyEquals = keyboard.querySelector(".key-equals");
 keyEquals.onclick = () => completeOperation(currOperandNode, prevOperandNode, operatorNode);
 
+const keyE = keyboard.querySelector(".key-e");
+keyE.onclick = () => currOperandNode.textContent = insertNumberIntoNode(currOperandNode, Math.E, true);
 
-// const keyCE = keyboard.querySelector(".key-CE");
-// keyCE.onclick = () => casdlearScreen(screen);
+const keyPi = keyboard.querySelector(".key-pi");
+keyPi.onclick = () => currOperandNode.textContent = insertNumberIntoNode(currOperandNode, Math.PI, true);
 
+const keyPow = keyboard.querySelector(".key-pow");
+keyPow.onclick = () => enterOperation(currOperandNode, prevOperandNode, operatorNode, "^");
+
+const keyRound2 = keyboard.querySelector(".key-round2");
+keyRound2.onclick = () => roundContent(currOperandNode, 2);
+
+const keyRound0 = keyboard.querySelector(".key-round0");
+keyRound0.onclick = () => roundContent(currOperandNode, 0);
 
 
 document.addEventListener("keydown", (e) => {
     console.log(e);
 
-    cePressedCount = e.key === "c" ? cePressedCount+1 : 0;
-
     switch (e.key) {
         case "0": case "1": case "2": case "3": case "4": case "5": case "6": case "7": case "8": case "9":
-            insertNumber(currOperandNode, +e.key);
+            currOperandNode.textContent = insertNumberIntoNode(currOperandNode, +e.key); 
             break;
-        case "Backspace":
-            removeLastNumber(currOperandNode);
-            break;
-        case "c":
-            clearScreen(currOperandNode, prevOperandNode, operatorNode, cePressedCount);
+        case "c": case "Backspace":
+            [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent] = clearScreen(currOperandNode, prevOperandNode, operatorNode); 
             break;
         case "s":
-            sqrtContent(currOperandNode);
+            sqrtContent(currOperandNode); 
             break;
         case "p":
-            divideContent(currOperandNode, 100);
+            currOperandNode.textContent = divideNodeValue(currOperandNode, 100); 
             break;
         case "r":
             recipContent(currOperandNode);
             break;
         case "/":
-            enterOperation(currOperandNode, prevOperandNode, operatorNode, "/");
+            enterOperation(currOperandNode, prevOperandNode, operatorNode, "/"); 
             break;
         case "*":
-            enterOperation(currOperandNode, prevOperandNode, operatorNode, "*");
+            enterOperation(currOperandNode, prevOperandNode, operatorNode, "*"); 
             break;
         case "-":
-            enterOperation(currOperandNode, prevOperandNode, operatorNode, "-");
+            enterOperation(currOperandNode, prevOperandNode, operatorNode, "-"); 
             break;
         case "+":
-            enterOperation(currOperandNode, prevOperandNode, operatorNode, "+");
+            enterOperation(currOperandNode, prevOperandNode, operatorNode, "+"); 
             break;
         case "=":
-            completeOperation(currOperandNode, prevOperandNode, operatorNode);
+            completeOperation(currOperandNode, prevOperandNode, operatorNode); 
+            break;
+        case "E":
+            currOperandNode.textContent = insertNumberIntoNode(currOperandNode, Math.E, true); 
+            break;
+        case "P":
+            currOperandNode.textContent = insertNumberIntoNode(currOperandNode, Math.PI, true); 
+            break;
+        case "w":
+            enterOperation(currOperandNode, prevOperandNode, operatorNode, "^");
             break;
     }
 });
 
-function insertNumber(currOperandNode, number) {
-    if (number === 0 && currOperandNode.textContent.length === 1 && currOperandNode.textContent[0] === "0") {
-        return;
-    } else if (currOperandNode.textContent.length === 1 && currOperandNode.textContent[0] === "0") {
-        currOperandNode.textContent = "";
+function insertNumberIntoNode(currOperandNode, number, clear = false) {   
+    let newTextContent = currOperandNode.textContent;
+    if (clear || currOperandNode.textContent.length === 1 && currOperandNode.textContent[0] === "0") {
+        newTextContent = "";
     }
-
-    if (currOperandNode.textContent.length < screenContentLengthLimit) {
-        currOperandNode.textContent += number;
+    
+    if (newTextContent.length < screenContentLengthLimit) {
+        newTextContent += number;
     }
+    return newTextContent;
 }
 
-function removeLastNumber(currOperandNode) {
-    if (currOperandNode.textContent.length === 0) {
-        return;
+function clearScreen(currOperandNode, prevOperandNode, operatorNode) {
+    let newTextContent = currOperandNode.textContent;
+    if (newTextContent.length === 0) {
+        return newTextContent, "", "";
     }
 
     let offset = 1;
-    if (currOperandNode.textContent[currOperandNode.textContent.length-2] === ".") {
+    if (newTextContent.length > 2 && newTextContent[newTextContent.length - 2] === ".") {
         offset = 2;
     }
-    currOperandNode.textContent = currOperandNode.textContent.substring(0, currOperandNode.textContent.length-offset);
-}
-
-function clearScreen(currOperandNode, prevOperandNode, operatorNode, cePressedCount) {
-    console.log(cePressedCount);
-    if (cePressedCount > 1) {
-        prevOperandNode.textContent = "";
-        operatorNode.textContent = "";
-        return 0;
-    }
-    currOperandNode.textContent = "";
-    return cePressedCount;
+    return [newTextContent.substring(0, newTextContent.length - offset), prevOperandNode.textContent, operatorNode.textContent];
 }
 
 function sqrtContent(currOperandNode) {
@@ -140,10 +134,16 @@ function sqrtContent(currOperandNode) {
     }
 }
 
-function divideContent(currOperandNode, value) {
-    if (currOperandNode.textContent.length > 0) {
-        currOperandNode.textContent /= value;
+function divideNodeValue(currOperandNode, value) {
+    if (currOperandNode.textContent.length == 0) {
+        return;
     }
+
+    let newTextContent = +currOperandNode.textContent / value; 
+    if (newTextContent === Infinity) {
+        newTextContent = "Error: can't divide by 0!";
+    }
+    return newTextContent;
 }
 
 function recipContent(currOperandNode) {
@@ -181,14 +181,16 @@ function completeOperation(currOperandNode, prevOperandNode, operatorNode) {
             currOperandNode.textContent = +prevOperandNode.textContent * +currOperandNode.textContent;
             break;
         case "/":
-            let result = +prevOperandNode.textContent / +currOperandNode.textContent;
-            if (result === Infinity) {
-                currOperandNode.textContent = "Error: can't divide by 0!";
-            } else {
-                currOperandNode.textContent = result;
-            }
+            currOperandNode.textContent = divideNodeValue(prevOperandNode, +currOperandNode.textContent);
+            break;
+        case "^":
+            currOperandNode.textContent = Math.pow(+prevOperandNode.textContent, +currOperandNode.textContent);
             break;
     }
     prevOperandNode.textContent = "";
     operatorNode.textContent = "";
+}
+
+function roundContent(currOperandNode, places) {
+    currOperandNode.textContent = (+currOperandNode.textContent).toFixed(places);
 }

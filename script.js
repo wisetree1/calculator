@@ -56,10 +56,10 @@ keyEquals.onclick = () => {
 };
 
 const keyE = nodeKeyboard.querySelector(".key-e");
-keyE.onclick = () => nodeCurrOperand.textContent = insertNumberIntoNode(nodeCurrOperand, Math.E, true);
+keyE.onclick = () => nodeCurrOperand.textContent = insertNumberIntoNode(nodeCurrOperand, String(Math.E), true, currDecimalPlaces);
 
 const keyPi = nodeKeyboard.querySelector(".key-pi");
-keyPi.onclick = () => nodeCurrOperand.textContent = insertNumberIntoNode(nodeCurrOperand, Math.PI, true);
+keyPi.onclick = () => nodeCurrOperand.textContent = insertNumberIntoNode(nodeCurrOperand, String(Math.PI), true, currDecimalPlaces);
 
 const keyPow = nodeKeyboard.querySelector(".key-pow");
 keyPow.onclick = () => [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent] = enterOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, "^");
@@ -114,10 +114,10 @@ document.addEventListener("keydown", (e) => {
             }
             break;
         case "E":
-            nodeCurrOperand.textContent = insertNumberIntoNode(nodeCurrOperand, String(Math.E), true); 
+            nodeCurrOperand.textContent = insertNumberIntoNode(nodeCurrOperand, String(Math.E), true, currDecimalPlaces); 
             break;
         case "P":
-            nodeCurrOperand.textContent = insertNumberIntoNode(nodeCurrOperand, String(Math.PI), true); 
+            nodeCurrOperand.textContent = insertNumberIntoNode(nodeCurrOperand, String(Math.PI), true, currDecimalPlaces); 
             break;
         case "^":
             [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent] = enterOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, "^");
@@ -136,7 +136,7 @@ document.addEventListener("keydown", (e) => {
     }
 });
 
-function insertNumberIntoNode(nodeCurrOperand, number, clear = false) {   
+function insertNumberIntoNode(nodeCurrOperand, number, withClear = false, decimalPlaces = 0) {   
     let newTextContent = nodeCurrOperand.textContent;
 
     if (number === "." && newTextContent.length === 0) {
@@ -147,8 +147,8 @@ function insertNumberIntoNode(nodeCurrOperand, number, clear = false) {
         return newTextContent;
     } 
 
-    if (clear) {
-        newTextContent = "";
+    if (withClear) {
+        return roundNodeValue(number, decimalPlaces);
     }
     
     if (newTextContent.length < screenContentLengthLimit) {
@@ -313,5 +313,11 @@ function getResultEquation(operationNumber, prevOperand, currOperand, operator, 
 function getNewHistoryChild(equation) {
     let newElement = document.createElement("p");
     newElement.textContent = equation;
+    newElement.style.border = `3px dashed ${getRandomColor()}`;
     return newElement;
+}
+
+function getRandomColor() {
+    const rand = () => Math.floor(Math.random() * 256);
+    return `rgb(${rand()}, ${rand()}, ${rand()})`;  
 }

@@ -17,10 +17,8 @@
         </div>
         <div class="keyboard">
             <div class="row first">
-                <button class="key-MC" title="Clear the memory">MC</button>
-                <button class="key-MR" title="Recall the value stored in memory and display it">MR</button>
-                <button class="key-M-" title="Subtract the displayed value from the memory">M-</button>
-                <button class="key-M+" title="Add the displayed value to the memory">M+</button>
+                <label for="decimal-places-range" id="decimal-places-label">3</label>
+                <input type="range" id="decimal-places-range" min="0" max="10" value="3" title="Number of decimal places">
                 <button class="key-CE" title="Press to clear the last digit (CE) (hotkey 'c' or 'Backspace')">CE</button>
             </div>
             <div class="row">
@@ -39,21 +37,21 @@
                     </math>
                 </button>
                 <button class="key-div" title="Divide (hotkey '/')">÷</button>
-                <button class="key-e" title="Insert 2.718 (hotkey 'e')">e</button>
+                <button class="key-e" title="Insert 2.718 (hotkey 'E')">e</button>
             </div>
             <div class="row">
                 <button class="key-7 number">7</button>
                 <button class="key-8 number">8</button>
                 <button class="key-9 number">9</button>
                 <button class="key-mult" title="Multiply (hotkey '*')">×</button>
-                <button class="key-pi" title="Insert 3.1415 (hotkey 'p')">π</button>
+                <button class="key-pi" title="Insert 3.1415 (hotkey 'P')">π</button>
             </div>
             <div class="row">
                 <button class="key-4 number">4</button>
                 <button class="key-5 number">5</button>
                 <button class="key-6 number">6</button>
                 <button class="key-sub" title="Subtract (hotkey '-')">-</button>
-                <button class="key-pow" title="Raise x to the power of y">x<sup>y</sup></button>
+                <button class="key-pow" title="Raise x to the power of y (hotkey '^')">x<sup>y</sup></button>
             </div>
             <div class="row">
                 <button class="key-1 number">1</button>
@@ -73,5 +71,6 @@
             </div>
         </div>
     </div>
+    <div class="history"></div>
 </body>
 </html>

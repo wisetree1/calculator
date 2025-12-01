@@ -7,10 +7,12 @@
 body {
     display: flex;
     justify-content: center;
+    
+    margin-top: 20px;
+    max-height: 520px;
 }
 
 .calculator {
-    margin-top: 20px;
     padding: 20px 20px 10px;
 
     border: 1px solid black;
@@ -55,9 +57,15 @@ body {
     gap: 25px;
 }
 
-/* .row.first, .row.last {
-    background-color: rgb(150, 150, 150);
-} */
+.calculator .keyboard .row .key-CE {
+    margin-left: auto;
+}
+
+.calculator .keyboard .row.first {
+    font-size: 33px;
+    align-items: center;
+    gap: 10px;
+}
 
 .calculator .keyboard button {
     font-size: 30px;
@@ -68,4 +76,17 @@ body {
 .calculator .keyboard button:active {
     background-color: initial; 
     box-shadow: none;
+}
+
+
+.history {
+    margin-left: 30px;
+    font-size: 30px;
+    
+    width: 500px;
+    overflow: auto;
+}
+
+.history * {
+    margin-bottom: 10px;
 }

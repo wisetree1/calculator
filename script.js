@@ -1,121 +1,143 @@
 "use strict";
 
 const screenContentLengthLimit = 16;
-const screen = document.body.querySelector(".screen");
+const nodeScreen = document.body.querySelector(".screen");
 
-const prevContentNode = screen.querySelector(".previous-content");
-const prevOperandNode = prevContentNode.querySelector(".previous-operand");
-const operatorNode = prevContentNode.querySelector(".operator");
-const currOperandNode = screen.querySelector(".current-operand");
+const nodePrevContent = nodeScreen.querySelector(".previous-content");
+const nodePrevOperand = nodePrevContent.querySelector(".previous-operand");
+const nodeOperator = nodePrevContent.querySelector(".operator");
+const nodeCurrOperand = nodeScreen.querySelector(".current-operand");
 
-const keyboard = document.body.querySelector(".keyboard");
+let newHistoryEquation = "";
+let operationNumber = 0;
+const nodeHistory = document.querySelector(".history");
 
-for (let numberBtn of keyboard.querySelectorAll(".number")) {
-    numberBtn.onclick = () => currOperandNode.textContent = insertNumberIntoNode(currOperandNode, numberBtn.textContent);
+const nodeKeyboard = document.body.querySelector(".keyboard");
+
+for (let numberBtn of nodeKeyboard.querySelectorAll(".number")) {
+    numberBtn.onclick = () => nodeCurrOperand.textContent = insertNumberIntoNode(nodeCurrOperand, numberBtn.textContent);
 }
 
-const keyCE = keyboard.querySelector(".key-CE");
-keyCE.onclick = () => [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent] = clearScreen(currOperandNode, prevOperandNode, operatorNode);
+const labelDecimalPlaces = nodeKeyboard.querySelector("#decimal-places-label");
+const inputDecimalPlaces = nodeKeyboard.querySelector("#decimal-places-range");
+let currDecimalPlaces = inputDecimalPlaces.value;
+inputDecimalPlaces.oninput = (e) => currDecimalPlaces = changeCurrentDecimalPlaces(labelDecimalPlaces, e.target.value);
 
-const keySqrt = keyboard.querySelector(".key-sqrt");
-keySqrt.onclick = () => currOperandNode.textContent = sqrtNodeValue(currOperandNode);
+const keyCE = nodeKeyboard.querySelector(".key-CE");
+keyCE.onclick = () => [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent] = clearScreen(nodeCurrOperand, nodePrevOperand, nodeOperator);
 
-const keyPercent = keyboard.querySelector(".key-percent");
-keyPercent.onclick = () => currOperandNode.textContent = divideNodeValue(currOperandNode, 100);
+const keySqrt = nodeKeyboard.querySelector(".key-sqrt");
+keySqrt.onclick = () => nodeCurrOperand.textContent = sqrtValue(nodeCurrOperand.textContent, currDecimalPlaces);
 
-const keyRecip = keyboard.querySelector(".key-recip");
-keyRecip.onclick = () => currOperandNode.textContent = recipNodeValue(currOperandNode);
+const keyPercent = nodeKeyboard.querySelector(".key-percent");
+keyPercent.onclick = () => nodeCurrOperand.textContent = divideValue(nodeCurrOperand.textContent, 100, currDecimalPlaces);
 
-const keyDiv = keyboard.querySelector(".key-div");
-keyDiv.onclick = () => [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent] = enterOperation(currOperandNode, prevOperandNode, operatorNode, "/");
+const keyRecip = nodeKeyboard.querySelector(".key-recip");
+keyRecip.onclick = () => nodeCurrOperand.textContent = recipNodeValue(nodeCurrOperand);
 
-const keyMult = keyboard.querySelector(".key-mult");
-keyMult.onclick = () => [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent] = enterOperation(currOperandNode, prevOperandNode, operatorNode, "*");
+const keyDiv = nodeKeyboard.querySelector(".key-div");
+keyDiv.onclick = () => [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent] = enterOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, "/");
 
-const keySub = keyboard.querySelector(".key-sub");
-keySub.onclick = () => [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent] = enterOperation(currOperandNode, prevOperandNode, operatorNode, "-");
+const keyMult = nodeKeyboard.querySelector(".key-mult");
+keyMult.onclick = () => [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent] = enterOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, "*");
 
-const keyAdd = keyboard.querySelector(".key-add");
-keyAdd.onclick = () => [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent] = enterOperation(currOperandNode, prevOperandNode, operatorNode, "/");
+const keySub = nodeKeyboard.querySelector(".key-sub");
+keySub.onclick = () => [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent] = enterOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, "-");
 
-const keyEquals = keyboard.querySelector(".key-equals");
-keyEquals.onclick = () => [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent] = completeOperation(currOperandNode, prevOperandNode, operatorNode);
+const keyAdd = nodeKeyboard.querySelector(".key-add");
+keyAdd.onclick = () => [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent] = enterOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, "/");
 
-const keyE = keyboard.querySelector(".key-e");
-keyE.onclick = () => currOperandNode.textContent = insertNumberIntoNode(currOperandNode, Math.E, true);
+const keyEquals = nodeKeyboard.querySelector(".key-equals");
+keyEquals.onclick = () => {
+    [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent, newHistoryEquation] = completeOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, currDecimalPlaces);
+    if (newHistoryEquation !== "") {
+        nodeHistory.insertBefore(getNewHistoryChild(newHistoryEquation), nodeHistory.firstChild);
+    }
+};
 
-const keyPi = keyboard.querySelector(".key-pi");
-keyPi.onclick = () => currOperandNode.textContent = insertNumberIntoNode(currOperandNode, Math.PI, true);
+const keyE = nodeKeyboard.querySelector(".key-e");
+keyE.onclick = () => nodeCurrOperand.textContent = insertNumberIntoNode(nodeCurrOperand, Math.E, true);
 
-const keyPow = keyboard.querySelector(".key-pow");
-keyPow.onclick = () => [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent] = enterOperation(currOperandNode, prevOperandNode, operatorNode, "^");
+const keyPi = nodeKeyboard.querySelector(".key-pi");
+keyPi.onclick = () => nodeCurrOperand.textContent = insertNumberIntoNode(nodeCurrOperand, Math.PI, true);
 
-const keyRound2 = keyboard.querySelector(".key-round2");
-keyRound2.onclick = () => currOperandNode.textContent = roundNodeValue(currOperandNode, 2);
+const keyPow = nodeKeyboard.querySelector(".key-pow");
+keyPow.onclick = () => [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent] = enterOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, "^");
 
-const keyRound0 = keyboard.querySelector(".key-round0");
-keyRound0.onclick = () => currOperandNode.textContent = roundNodeValue(currOperandNode, 0);
+const keyRound2 = nodeKeyboard.querySelector(".key-round2");
+keyRound2.onclick = () => nodeCurrOperand.textContent = roundNodeValue(nodeCurrOperand.textContent, 2);
 
-const keyDecimal = keyboard.querySelector(".key-decimal");
-keyDecimal.onclick = () => currOperandNode.textContent = insertNumberIntoNode(currOperandNode, ".");
+const keyRound0 = nodeKeyboard.querySelector(".key-round0");
+keyRound0.onclick = () => nodeCurrOperand.textContent = roundNodeValue(nodeCurrOperand.textContent, 0);
+
+const keyDecimal = nodeKeyboard.querySelector(".key-decimal");
+keyDecimal.onclick = () => nodeCurrOperand.textContent = insertNumberIntoNode(nodeCurrOperand, ".");
+
+const keySign = nodeKeyboard.querySelector(".key-sign");
+keySign.onclick = () => nodeCurrOperand.textContent = multiplyValue(nodeCurrOperand.textContent, -1, currDecimalPlaces);
 
 document.addEventListener("keydown", (e) => {
     // console.log(e);
 
     switch (e.key) {
         case "0": case "1": case "2": case "3": case "4": case "5": case "6": case "7": case "8": case "9":
-            currOperandNode.textContent = insertNumberIntoNode(currOperandNode, e.key); 
+            nodeCurrOperand.textContent = insertNumberIntoNode(nodeCurrOperand, e.key); 
             break;
         case "c": case "Backspace":
-            [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent] = clearScreen(currOperandNode, prevOperandNode, operatorNode); 
+            [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent] = clearScreen(nodeCurrOperand, nodePrevOperand, nodeOperator); 
             break;
-        case "s":
-            currOperandNode.textContent = sqrtNodeValue(currOperandNode); 
+        case "S":
+            nodeCurrOperand.textContent = sqrtValue(nodeCurrOperand.textContent, currDecimalPlaces); 
             break;
         case "p":
-            currOperandNode.textContent = divideNodeValue(currOperandNode, 100); 
+            nodeCurrOperand.textContent = divideValue(nodeCurrOperand.textContent, 100, currDecimalPlaces); 
             break;
         case "r":
-            currOperandNode.textContent = recipNodeValue(currOperandNode);
+            nodeCurrOperand.textContent = recipNodeValue(nodeCurrOperand);
             break;
         case "/":
-            [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent] = enterOperation(currOperandNode, prevOperandNode, operatorNode, "/"); 
+            [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent] = enterOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, "/"); 
             break;
         case "*":
-            [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent] = enterOperation(currOperandNode, prevOperandNode, operatorNode, "*"); 
+            [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent] = enterOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, "*"); 
             break;
         case "-":
-            [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent] = enterOperation(currOperandNode, prevOperandNode, operatorNode, "-"); 
+            [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent] = enterOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, "-"); 
             break;
         case "+":
-            [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent] = enterOperation(currOperandNode, prevOperandNode, operatorNode, "+"); 
+            [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent] = enterOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, "+"); 
             break;
         case "=":
-            [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent] = completeOperation(currOperandNode, prevOperandNode, operatorNode); 
+            [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent, newHistoryEquation] = completeOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, currDecimalPlaces); 
+            if (newHistoryEquation !== "") {
+                nodeHistory.insertBefore(getNewHistoryChild(newHistoryEquation), nodeHistory.firstChild);
+            }
             break;
         case "E":
-            currOperandNode.textContent = insertNumberIntoNode(currOperandNode, String(Math.E), true); 
+            nodeCurrOperand.textContent = insertNumberIntoNode(nodeCurrOperand, String(Math.E), true); 
             break;
         case "P":
-            currOperandNode.textContent = insertNumberIntoNode(currOperandNode, String(Math.PI), true); 
+            nodeCurrOperand.textContent = insertNumberIntoNode(nodeCurrOperand, String(Math.PI), true); 
             break;
-        case "w":
-            [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent] = enterOperation(currOperandNode, prevOperandNode, operatorNode, "^");
+        case "^":
+            [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent] = enterOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, "^");
             break;
-
         case ".":
-            currOperandNode.textContent = insertNumberIntoNode(currOperandNode, ".");
-            return
+            nodeCurrOperand.textContent = insertNumberIntoNode(nodeCurrOperand, ".");
+            break;
+        case "s":
+            nodeCurrOperand.textContent = multiplyValue(nodeCurrOperand.textContent, -1, currDecimalPlaces);
+            break;
         
         // debug
         case "D":
-            console.log(`currOperandNode: ${currOperandNode.textContent}, prevOperandNode: ${prevOperandNode.textContent}, operatorNode: ${operatorNode.textContent},`);
+            console.log(`nodeCurrOperand: ${nodeCurrOperand.textContent}, nodePrevOperand: ${nodePrevOperand.textContent}, nodeOperator: ${nodeOperator.textContent},`);
             break;
     }
 });
 
-function insertNumberIntoNode(currOperandNode, number, clear = false) {   
-    let newTextContent = currOperandNode.textContent;
+function insertNumberIntoNode(nodeCurrOperand, number, clear = false) {   
+    let newTextContent = nodeCurrOperand.textContent;
 
     if (number === "." && newTextContent.length === 0) {
         return "0.";
@@ -135,109 +157,161 @@ function insertNumberIntoNode(currOperandNode, number, clear = false) {
     return newTextContent;
 }
 
-function clearScreen(currOperandNode, prevOperandNode, operatorNode) {
-    let newTextContent = currOperandNode.textContent;
+function clearScreen(nodeCurrOperand, nodePrevOperand, nodeOperator) {
+    let newTextContent = nodeCurrOperand.textContent;
     if (newTextContent.length === 0) {
         return newTextContent, "", "";
     }
 
-    return [newTextContent.substring(0, newTextContent.length - 1), prevOperandNode.textContent, operatorNode.textContent];
-}
-
-function sqrtNodeValue(currOperandNode) {
-    let newTextContent = currOperandNode.textContent;
-    if (newTextContent.length === 0) {
-        return newTextContent;
+    if (newTextContent.includes("Error") ||  newTextContent.includes("Infinity") || newTextContent.includes("NaN")) {
+        return "", "", "";
     }
 
-    return Math.sqrt(+newTextContent);
-}
-
-function addNodeValue(currOperandNode, value) {
-    let newTextContent = currOperandNode.textContent;
-    if (newTextContent.length === 0) {
-        return newTextContent;
+    let leftOffset = 1;
+    if (newTextContent.length > 2 && newTextContent[newTextContent.length - 2] === "+") {
+        leftOffset = 3;
     }
 
-    return +newTextContent + value;
+    return [newTextContent.substring(0, newTextContent.length - leftOffset), nodePrevOperand.textContent, nodeOperator.textContent];
 }
 
-function subtractNodeValue(currOperandNode, value) {
-    let newTextContent = currOperandNode.textContent;
-    if (newTextContent.length === 0) {
-        return newTextContent;
+function sqrtValue(value, currDecimalPlaces) {
+    if (value.length === 0) {
+        return value;
     }
+    value = Math.sqrt(+value);
 
-    return +newTextContent - value;
+    return roundNodeValue(value, currDecimalPlaces);
 }
 
-function multiplyNodeValue(currOperandNode, value) {
-    let newTextContent = currOperandNode.textContent;
-    if (newTextContent.length === 0) {
-        return newTextContent;
+function addValue(value, other, currDecimalPlaces) {
+    if (value.length === 0) {
+        return value;
     }
+    value = (+value) + other;
 
-    return +newTextContent * value;
+    return roundNodeValue(value, currDecimalPlaces);
 }
 
-function divideNodeValue(currOperandNode, value) {
-    let newTextContent = currOperandNode.textContent;
-    if (newTextContent.length === 0) {
-        return newTextContent;
+function subtractValue(value, other, currDecimalPlaces) {
+    if (value.length === 0) {
+        return value;
     }
+    value = (+value) - other;
 
-    newTextContent = +currOperandNode.textContent / value; 
-    if (newTextContent === Infinity) {
-        newTextContent = "Error: can't divide by 0!";
-    }
-    return newTextContent;
+    return roundNodeValue(value, currDecimalPlaces);
 }
 
-function recipNodeValue(currOperandNode) {
-    let newTextContent = currOperandNode.textContent;
+function multiplyValue(value, other, currDecimalPlaces) {
+    if (value.length === 0) {
+        return value;
+    }
+    value = (+value) * other;
+
+    return roundNodeValue(value, currDecimalPlaces);
+}
+
+function divideValue(value, other, decimalPlaces) {
+    if (value.length === 0) {
+        return value;
+    }
+
+    value = (+value) / other; 
+    if (value === Infinity) {
+        return "Error: can't divide by 0!";
+    }
+    return roundNodeValue(value, decimalPlaces);
+}
+
+function raiseValueToPower(value, other, decimalPlaces) {
+    if (value.length === 0) {
+        return value;
+    }
+
+    value = Math.pow(+value, other);
+    return roundNodeValue(value, decimalPlaces);
+}
+
+function recipNodeValue(nodeCurrOperand) {
+    let newTextContent = nodeCurrOperand.textContent;
     if (newTextContent.length === 0 || newTextContent === "0") {
         return newTextContent;
     }
     return 1 / newTextContent;
 }
 
-function enterOperation(currOperandNode, prevOperandNode, operatorNode, newOperator) {
-    if (currOperandNode.textContent.length === 0 || prevOperandNode.textContent.length != 0 ||
-        currOperandNode.textContent[currOperandNode.textContent.length-1] === "."
+function enterOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, newOperator) {
+    if (nodeCurrOperand.textContent.length === 0 || nodePrevOperand.textContent.length !== 0 ||
+        nodeCurrOperand.textContent[nodeCurrOperand.textContent.length - 1] === "." ||
+        nodeCurrOperand.textContent.includes("Error") ||  nodeCurrOperand.textContent.includes("Infinity") || nodeCurrOperand.textContent.includes("NaN")
     ) {
-        return [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent];
+        return [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent];
     }
 
-    return ["", currOperandNode.textContent, newOperator];
+    return ["", nodeCurrOperand.textContent, newOperator];
 }
 
-function completeOperation(currOperandNode, prevOperandNode, operatorNode) {
-    let newTextContent = currOperandNode.textContent;
-    if (newTextContent.length === 0 || currOperandNode.textContent[currOperandNode.textContent.length-1] === ".") {
-        return [currOperandNode.textContent, prevOperandNode.textContent, operatorNode.textContent];
+function completeOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, currDecimalPlaces) {
+    let newTextContent = nodeCurrOperand.textContent;
+    if (newTextContent.length === 0 || nodePrevOperand.textContent.length === 0 ||
+        newTextContent[newTextContent.length - 1] === "."
+    ) {
+        return [newTextContent, nodePrevOperand.textContent, nodeOperator.textContent, ""];
     }
 
-    switch (operatorNode.textContent) {
+    switch (nodeOperator.textContent) {
         case "+":
-            newTextContent = addNodeValue(prevOperandNode, +newTextContent);
+            newTextContent = addValue(nodePrevOperand.textContent, +newTextContent, currDecimalPlaces);
             break;
         case "-":
-            newTextContent = subtractNodeValue(prevOperandNode, +newTextContent);
+            newTextContent = subtractValue(nodePrevOperand.textContent, +newTextContent, currDecimalPlaces);
             break
         case "*":
-            newTextContent = multiplyNodeValue(prevOperandNode, +newTextContent);
+            newTextContent = multiplyValue(nodePrevOperand.textContent, +newTextContent, currDecimalPlaces);
             break;
         case "/":
-            newTextContent = divideNodeValue(prevOperandNode, +newTextContent);
+            newTextContent = divideValue(nodePrevOperand.textContent, +newTextContent, currDecimalPlaces);
             break;
         case "^":
-            newTextContent = Math.pow(+prevOperandNode.textContent, +newTextContent);
+            newTextContent = raiseValueToPower(nodePrevOperand.textContent, +newTextContent, currDecimalPlaces);
             break;
     }
-    
-    return [newTextContent, "", ""];
+
+    let resultEquation = getResultEquation(++operationNumber, nodePrevOperand.textContent, nodeCurrOperand.textContent, nodeOperator.textContent, newTextContent);
+
+    return [newTextContent, "", "", resultEquation];
 }
 
-function roundNodeValue(currOperandNode, decimalPlaces) {
-    return (+currOperandNode.textContent).toFixed(decimalPlaces);
+function changeCurrentDecimalPlaces(decimalPlacesLabel, newValue) {
+    decimalPlacesLabel.textContent = newValue;
+    return newValue;
+}
+
+function roundNodeValue(value, decimalPlaces) {
+    let fixed = (+value).toFixed(decimalPlaces);
+    if (!fixed.includes(".")) {
+        return fixed;
+    }
+
+    let split = String(fixed).split("."); 
+    if (split[1] == 0) {
+        return split[0];
+    }
+
+    if (split[1].includes("e")) {
+        let decimalApprox = split[1].substring(0, decimalPlaces);
+
+        return split[0] + (decimalApprox != "" ? "." + decimalApprox : "") + "e" + split[1].split("e")[1];
+    }
+    return fixed;
+}
+
+function getResultEquation(operationNumber, prevOperand, currOperand, operator, result) {
+    return `${operationNumber}: ${prevOperand} ${operator} ${currOperand} = ${result}`;
+}
+
+function getNewHistoryChild(equation) {
+    let newElement = document.createElement("p");
+    newElement.textContent = equation;
+    return newElement;
 }

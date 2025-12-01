@@ -78,8 +78,6 @@ const keySign = nodeKeyboard.querySelector(".key-sign");
 keySign.onclick = () => [nodeCurrOperand.textContent, withClear] = multiplyValue(nodeCurrOperand.textContent, -1, currDecimalPlaces);
 
 document.addEventListener("keydown", (e) => {
-    // console.log(e);
-
     switch (e.key) {
         case "0": case "1": case "2": case "3": case "4": case "5": case "6": case "7": case "8": case "9":
             [nodeCurrOperand.textContent, withClear] = insertNumberIntoNode(nodeCurrOperand, e.key, withClear); 
@@ -128,11 +126,6 @@ document.addEventListener("keydown", (e) => {
             break;
         case "s":
             [nodeCurrOperand.textContent, withClear] = multiplyValue(nodeCurrOperand.textContent, -1, currDecimalPlaces);
-            break;
-        
-        // debug
-        case "D":
-            console.log(`nodeCurrOperand: ${nodeCurrOperand.textContent}, nodePrevOperand: ${nodePrevOperand.textContent}, nodeOperator: ${nodeOperator.textContent},`);
             break;
     }
 });
@@ -238,7 +231,6 @@ function raiseValueToPower(value, other, decimalPlaces) {
     }
 
     value = Math.pow(+value, other);
-    console.log(value);
     return roundNodeValue(value, decimalPlaces)[0];
 }
 

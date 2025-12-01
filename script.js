@@ -46,7 +46,7 @@ const keySub = nodeKeyboard.querySelector(".key-sub");
 keySub.onclick = () => [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent] = enterOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, "-");
 
 const keyAdd = nodeKeyboard.querySelector(".key-add");
-keyAdd.onclick = () => [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent] = enterOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, "/");
+keyAdd.onclick = () => [nodeCurrOperand.textContent, nodePrevOperand.textContent, nodeOperator.textContent] = enterOperation(nodeCurrOperand, nodePrevOperand, nodeOperator, "+");
 
 const keyEquals = nodeKeyboard.querySelector(".key-equals");
 keyEquals.onclick = () => {
@@ -238,6 +238,7 @@ function raiseValueToPower(value, other, decimalPlaces) {
     }
 
     value = Math.pow(+value, other);
+    console.log(value);
     return roundNodeValue(value, decimalPlaces)[0];
 }
 
@@ -312,9 +313,9 @@ function roundNodeValue(value, decimalPlaces) {
 
     if (split[1].includes("e")) {
         let decimalApprox = split[1].substring(0, decimalPlaces);
-
-        return split[0] + (decimalApprox != "" ? "." + decimalApprox : "") + "e" + split[1].split("e")[1];
+        return [split[0] + (decimalApprox != "" ? "." + decimalApprox : "") + "e" + split[1].split("e")[1], false];
     }
+
     return [fixed, false];
 }
 
